@@ -25,28 +25,38 @@ int main(int argc, char *argv[])
         cout<<"into h264 video files in the same resolution as a picture!"<<endl;
         cout<<"To convert the sequence just write in console ./exr-h264ffmpeg <folder_name>"<<endl;
     }
+    else
+    {
+        QDir dir(argv[2]);
+        QFileInfoList dirContent = dir.entryInfoList(QStringList() << "*.exr", QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
+        if(dirContent.empty())
+        {
+            cout<<"Derectory with .exr files are empty."<<endl;
+            cout<<"Run program with correct directory!"<<endl;
+        }
+        else
+        {
+            QString file_name = dirContent.at(0).fileName();
+            char* ch_file_name = file_name.toAscii().data();
+            int pos=digits_pos(ch_file_name);
+            QString prefix=file_name.mid(0,pos);
+            QString number=file_name.mid(pos,file_name.size());
 
-    QDir dir(argv[2]);
-    QFileInfoList dirContent = dir.entryInfoList(QStringList() << "*.exr", QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
-    QString file_name = dirContent.at(0).fileName();
-    char* ch_file_name = file_name.toAscii().data();
-    int pos=digits_pos(ch_file_name);
-    QString prefix=file_name.mid(0,pos);
-    QString number=file_name.mid(pos,file_name.size());
+            QString subStr(".exr"); // String to replace.
+            QString newStr(""); // Replacement string.
+            number.replace(number.indexOf(subStr), subStr.size(), newStr);
 
-    QString subStr(".exr"); // String to replace.
-    QString newStr(""); // Replacement string.
-    number.replace(number.indexOf(subStr), subStr.size(), newStr);
-
-    int num=number.size();
-    QString command="ffmpeg -framerate 30  -y  -i ";
-    command.append(prefix);
-    command.append("%0");
-    command.append(QString::number(num));
-    command.append("d.exr ");
-    command.append("-c:v libx264  out.mov");
-    system(command.toAscii());
-    //system("ffmpeg -f image2 -pattern_type glob -framerate 12 -i singlepart.%02d.exr -c:v libx264 -pix_fmt yuv420p -preset slow -crf 17 out.mov");-pix_fmt yuv420p
+            int num=number.size();
+            QString command="ffmpeg -framerate 30  -y  -i ";
+            command.append(prefix);
+            command.append("%0");
+            command.append(QString::number(num));
+            command.append("d.exr ");
+            command.append("-c:v libx264  out.mov");
+            system(command.toAscii());
+            //system("ffmpeg -f image2 -pattern_type glob -framerate 12 -i singlepart.%02d.exr -c:v libx264 -pix_fmt yuv420p -preset slow -crf 17 out.mov");-pix_fmt yuv420p
+        }
+    }
     return a.exec();
 }
 
